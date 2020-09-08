@@ -5,19 +5,23 @@
 
 // Tested with package v4.0.0
 
-FOREIGN_BEGIN( Data_Int )
+FOREIGN_BEGIN(Data_Int)
 
-exports["toNumber"] = [](const boxed& n) -> boxed {
+exports["toNumber"] = [](const boxed &n) -> boxed {
     return static_cast<double>(unbox<int>(n));
 };
 
-exports["pow"] = [](const boxed& n_) -> boxed {
-    const auto n = unbox<int>(n_);
-    return [=](const boxed& p) -> boxed {
-        const auto r = std::lround(std::pow(n, unbox<int>(p)));
-        assert(r >= std::numeric_limits<int>::min() &&
-               r <= std::numeric_limits<int>::max());
-        return static_cast<int>(r);
+//foreign import fromNumberImpl
+//  :: (forall a. a -> Maybe a)
+//  -> (forall a. Maybe a)
+//  -> Number
+//  -> Maybe Int
+
+exports["fromNumberImpl"] = [](const boxed &f_) -> boxed {
+    return [=](const boxed &m_) -> boxed {
+        return [=](const boxed &n) -> boxed {
+            return f_(static_cast<int>(unbox<double>(n)));
+        };
     };
 };
 
